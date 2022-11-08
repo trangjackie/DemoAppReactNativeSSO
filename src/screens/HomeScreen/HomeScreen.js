@@ -1,24 +1,16 @@
-import AsyncStorage from '@react-native-async-storage/async-storage'
+//import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useNavigation } from '@react-navigation/native'
 import React, { useEffect } from 'react'
 import { StyleSheet, Text, Image, View, TouchableOpacity, ImageBackground } from 'react-native'
-import RNRestart from 'react-native-restart'
 
 const HomeScreen = () => {
   const navigation = useNavigation();
-  const setAuth = async () => {
-    let token = await AsyncStorage.getItem('accessToken')
-    console.log('token Storage Trang Home:', token)
-    // AsyncStorage.removeItem('accessToken')
-  }
+  
   const PushScreen = () => {
     console.log('HOME')
-    AsyncStorage.removeItem('accessToken')
-    RNRestart.Restart();
+
   }
-  useEffect(() => {
-    setAuth()
-  }, [])
+  
 
   return (
     <>

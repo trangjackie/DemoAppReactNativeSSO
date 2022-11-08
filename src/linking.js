@@ -1,10 +1,13 @@
 const config = {
   screens: {
     Login: {
-      path: "login",
+      path: "login/:code?:state?:session_state?",
+      parse: {
+        code: (code) => `login-${code}`,
+      }
     },
     Home: {
-      path: 'home',
+      path: 'home'
     }
   
   },

@@ -8,7 +8,9 @@
 
  import React, { Suspense, useState } from 'react';
  import { StyleSheet, Button, View, Alert} from 'react-native';
-
+ import { NavigationContainer } from '@react-navigation/native';
+ import { createNativeStackNavigator } from '@react-navigation/native-stack';
+ 
 
  // component
  import deeplinking from './src/linking';
@@ -18,15 +20,20 @@
  // helper
  import { checkConnected } from './src/helpers/common.helper';
 import LoginScreen from './src/screens/LoginScreen';
+import HomeScreen from './src/screens/HomeScreen';
  
  const App =() => {
-   const [connectStatus, setConnectStatus] = useState(false);
-   checkConnected().then(res => {
-     setConnectStatus(res);
-   });
+  const Stack = createNativeStackNavigator(); // Stack contains Screen & Navigator properties
  
    return (
-    <LoginScreen linking={deeplinking}/>
+    <NavigationContainer linking={deeplinking}>
+      
+        <Stack.Navigator>
+          <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="Home" component={HomeScreen} />
+        </Stack.Navigator>
+      
+    </NavigationContainer>
     
            
    );

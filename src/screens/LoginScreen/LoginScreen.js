@@ -1,13 +1,28 @@
 import { StyleSheet, Text, TouchableOpacity, View, Alert, Image, Button, Linking } from 'react-native';
-import { TextInput } from 'react-native-paper';
+
 import React, { useContext, useState  } from 'react'
+
+import jwt_decode from "jwt-decode";
 
 
 // heler
 
 import { SSOVinorSoftFE } from '../../helpers/sso';
 
-const LoginScreen = () => {
+const LoginScreen = ({route}) => {
+  //const code = route.params.code;
+ 
+  const apath = route.path;
+
+  // Trong trường hợp params chứa thông tin về authentication code (do SSO trả về sau khi login thành công)
+  // Ví dụ: testsso://app/login?state=afce6ddd-d151-466f-123456786b2-a0bf63bc6574&session_state=278f62d5-d822-4b86-91c7-65d208aa3b29&code=14212c9a-813b-48b7-8365-c7ef67529a05.278f62d5-d822-4b86-91c7-65d208aa3b29.6db14839-3f08-43d5-8b10-4df756fac855
+  // cắt lấy phần code
+  
+  //let have_code = text.includes("code");
+    const strlist = String(route.path).split('code=');
+    const acode = strlist[1];
+    var atoken = '';
+
   
   const handleSSO = async () => {
     const x = new SSOVinorSoftFE({
@@ -19,6 +34,60 @@ const LoginScreen = () => {
       //await InAppBrowser.open(x.getLoginUrl());
 
       Linking.openURL(x.getLoginUrl())
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const sendCodeToSSO = async () => {
+    const realmUrl= 'http://117.4.247.68:10825/realms/demo/';
+    const subpath = 'protocol/openid-connect/token';
+    const  _clientId= 'testApp1';
+    const  _redirect_uri= 'testsso://app/login';
+    const _client_secret = 'Jue7RnRsDZxVzpkuTk0c5iHws4SYq05o';
+    const _grant_type = 'authorization_code';
+    const _scope = 'openid email profile';
+    var details = {
+      'code': acode,
+      'client_id': 'testApp1',
+      'grant_type': 'authorization_code',
+      'client_secret': 'Jue7RnRsDZxVzpkuTk0c5iHws4SYq05o',
+      'scope':'openid email profile',
+      'redirect_uri':'testsso://app/login'
+    };
+    var formBody = [];
+    for (var property in details) {
+      var encodedKey = encodeURIComponent(property);
+      var encodedValue = encodeURIComponent(details[property]);
+      formBody.push(encodedKey + "=" + encodedValue);
+    }
+    formBody = formBody.join("&");
+    //console.log(formBody);
+    try {
+       await fetch(
+        realmUrl+subpath, 
+        { // request option
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          }, 
+          body: formBody
+        })
+        .then(responseData => {
+          //console.log(responseData);
+          responseData.json()
+              .then(_bodyBlob => {
+                  console.log(_bodyBlob.access_token);
+                  var decoded = jwt_decode(_bodyBlob.access_token);
+                  console.log(decoded);
+                
+              });
+              
+        })
+        .catch(function (error) {
+          console.log(`API error: ${error}`);
+          return Promise.reject(error);
+      });
     } catch (error) {
       console.log(error);
     }
@@ -37,6 +106,15 @@ const LoginScreen = () => {
                      handleSSO
                     }
                   />
+                  <Text style={styles.contentLabel}>Code: {acode}</Text>
+
+                  <Button
+                    title="Send code to get access token"
+                    onPress={
+                     sendCodeToSSO
+                    }
+                  />
+                  
 
               </View>
 

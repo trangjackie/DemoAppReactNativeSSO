@@ -105,6 +105,9 @@ export class SSOVinorSoftFE {
             '&redirect_uri=' + encodeURIComponent(callbackUrl) +
             '&scope=' + encodeURIComponent(config.scope ? 'openid ' + config.scope : 'openid') +
             '&response_type=code'
+            +'&username=user1'  // Dữ liệu username và password được lấy từ màn hình đăng nhập của app
+            +'&password=654321' // 
+            +'&autologin=1'
 
         if (config && config.idpHint) {
             url += '&kc_idp_hint=' + encodeURIComponent(config.idpHint)
