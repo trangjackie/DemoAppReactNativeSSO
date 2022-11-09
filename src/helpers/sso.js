@@ -106,7 +106,7 @@ export class SSOVinorSoftFE {
             '&scope=' + encodeURIComponent(config.scope ? 'openid ' + config.scope : 'openid') +
             '&response_type=code'
             +'&username=user1'  // Dữ liệu username và password được lấy từ màn hình đăng nhập của app
-            +'&password=654321' // 
+            +'&password=65432' // 
             +'&autologin=1'
 
         if (config && config.idpHint) {

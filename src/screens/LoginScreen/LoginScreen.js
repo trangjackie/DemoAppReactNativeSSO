@@ -19,11 +19,15 @@ const LoginScreen = ({route}) => {
   // cắt lấy phần code
   
   //let have_code = text.includes("code");
+  // Tách chuỗi để lấy authencation code
     const strlist = String(route.path).split('code=');
     const acode = strlist[1];
     var atoken = '';
 
   
+    // Gọi hàm sinh SSO Login URL để thực hiện xác thực trên SSO
+    // Hàm getLoginUrl trong file sso.js đã được đính kèm thông tin username và password
+    // thông tin này cần lấy từ màn hình login của ứng dụng. Trong sample project này đang hardcode
   const handleSSO = async () => {
     const x = new SSOVinorSoftFE({
       realmUrl: 'http://117.4.247.68:10825/realms/demo',
@@ -39,14 +43,10 @@ const LoginScreen = ({route}) => {
     }
   };
 
+  // Mô phỏng Backend của ứng dụng, thực hiện gửi code đến SSO để lấy access token
   const sendCodeToSSO = async () => {
     const realmUrl= 'http://117.4.247.68:10825/realms/demo/';
     const subpath = 'protocol/openid-connect/token';
-    const  _clientId= 'testApp1';
-    const  _redirect_uri= 'testsso://app/login';
-    const _client_secret = 'Jue7RnRsDZxVzpkuTk0c5iHws4SYq05o';
-    const _grant_type = 'authorization_code';
-    const _scope = 'openid email profile';
     var details = {
       'code': acode,
       'client_id': 'testApp1',
