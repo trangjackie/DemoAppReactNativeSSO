@@ -30,9 +30,10 @@ const LoginScreen = ({route}) => {
     // thông tin này cần lấy từ màn hình login của ứng dụng. Trong sample project này đang hardcode
   const handleSSO = async () => {
     const x = new SSOVinorSoftFE({
-      realmUrl: 'http://117.4.247.68:10825/realms/demo',
+      //realmUrl: 'http://172.21.180.110:8080/realms/master', // Local sso
+      realmUrl: 'http://117.4.247.68:10825/realms/demo', // Vinorsoft sso uat
       clientId: 'testApp1',
-      callbackUrl: 'testsso://app/login'
+      callbackUrl: 'testsso://app/login',
     });
     try {
       //await InAppBrowser.open(x.getLoginUrl());
@@ -43,15 +44,31 @@ const LoginScreen = ({route}) => {
     }
   };
 
+  var id_token = "";
+  const logoutSSO = async () => {
+    try {
+      const realmUrl= 'http://117.4.247.68:10825/realms/demo/'; // Vinorsoft sso uat
+      var logoutCallbackUrl= 'testsso://app/login';
+      var url = realmUrl+'protocol/openid-connect/logout'+'?post_logout_redirect_uri='+encodeURIComponent(logoutCallbackUrl)
+      +'&id_token_hint='+ id_token;
+      console.log(url);
+      Linking.openURL(url)
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   // Mô phỏng Backend của ứng dụng, thực hiện gửi code đến SSO để lấy access token
   const sendCodeToSSO = async () => {
-    const realmUrl= 'http://117.4.247.68:10825/realms/demo/';
+    //const realmUrl= 'http://172.21.180.110:8080/realms/master/'; // local sso
+    const realmUrl= 'http://117.4.247.68:10825/realms/demo/'; // Vinorsoft sso uat
     const subpath = 'protocol/openid-connect/token';
     var details = {
       'code': acode,
       'client_id': 'testApp1',
       'grant_type': 'authorization_code',
-      'client_secret': 'Jue7RnRsDZxVzpkuTk0c5iHws4SYq05o',
+      //'client_secret': '3hT0d0wo3BUBsChfWnoreFyfv9Fx6GVO', // local sso
+      'client_secret': 'Jue7RnRsDZxVzpkuTk0c5iHws4SYq05o', // Vinorsoft sso uat
       'scope':'openid email profile',
       'redirect_uri':'testsso://app/login'
     };
@@ -81,6 +98,8 @@ const LoginScreen = ({route}) => {
                   var decoded = jwt_decode(_bodyBlob.access_token);
                   console.log(decoded);
                 
+                  // Lấy ID token để dành cho hàm logout
+                  id_token = _bodyBlob.id_token;
               });
               
         })
@@ -106,7 +125,7 @@ const LoginScreen = ({route}) => {
                      handleSSO
                     }
                   />
-                  <Text style={styles.contentLabel}>Code: {acode}</Text>
+                  <Text style={styles.contentLabel} selectable >Code: {acode}</Text>
 
                   <Button
                     title="Send code to get access token"
@@ -115,7 +134,12 @@ const LoginScreen = ({route}) => {
                     }
                   />
                   
-
+                  <Button
+                    title="Logout"
+                    onPress={
+                     logoutSSO
+                    }
+                  />
               </View>
 
     </View>

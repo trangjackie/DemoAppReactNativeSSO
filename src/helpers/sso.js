@@ -107,7 +107,7 @@ export class SSOVinorSoftFE {
             '&response_type=code'
             +'&username=user1'  // Dữ liệu username và password được lấy từ màn hình đăng nhập của app
             +'&password=654321' // 
-            +'&autologin=1'
+            //+'&autologin=1'
 
         if (config && config.idpHint) {
             url += '&kc_idp_hint=' + encodeURIComponent(config.idpHint)
@@ -115,13 +115,16 @@ export class SSOVinorSoftFE {
         return url
     }
 
-    logoutUrl(redirectUrl, idTokenHint) {
-        const url = new URL(this.opt.realmUrl + '/protocol/openid-connect/logout')
-
-        if (redirectUrl && idTokenHint) {
-            url.searchParams.set('id_token_hint', idTokenHint)
-            url.searchParams.set('post_logout_redirect_uri', redirectUrl)
+    logoutUrl(idTokenHint) {
+        var url = new URL(this.opt.realmUrl + '/protocol/openid-connect/logout')
+        
+        if (this.opt.logoutCallbackUrl && this.opt.idtoken) {
+            url = url
+            +'?post_logout_redirect_uri'+logoutCallbackUrl
+            +'&id_token_hint'+ idTokenHint;
+            
         }
+        console.log(url);
         return url.toString()
     }
 }
