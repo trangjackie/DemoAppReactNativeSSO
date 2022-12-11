@@ -32,6 +32,14 @@ const LoginScreen = ({route}) => {
     var id_token = "";
     var refresh_token = "";
 
+    var access_token_1 = '';
+    var id_token_1 = "";
+    var refresh_token_1 = "";
+
+    var access_token_2 = '';
+    var id_token_2 = "";
+    var refresh_token_2 = "";
+
   //////////////// ĐĂNG NHẬP THÔNG QUA WEB //////////////////////////////////////
     // Gọi hàm sinh SSO Login URL để thực hiện xác thực trên SSO
     // Hàm getLoginUrl trong file sso.js đã được đính kèm thông tin username và password
@@ -39,7 +47,7 @@ const LoginScreen = ({route}) => {
   const handleSSO = async () => {
     const x = new SSOVinorSoftFE({
       //realmUrl: 'http://172.21.180.110:8080/realms/master', // Local sso
-      realmUrl: 'https://172.22.213.240:9000/realms/demo', // Vinorsoft sso uat
+      realmUrl: 'https://192.168.91.78:9000/realms/demo', // Vinorsoft sso uat
       clientId: 'testApp1',
       callbackUrl: 'testsso://app/login',
     });
@@ -56,7 +64,7 @@ const LoginScreen = ({route}) => {
   
   const logoutSSO = async () => {
     try {
-      const realmUrl= 'https://172.22.213.240:9000/realms/demo/'; // Vinorsoft sso uat
+      const realmUrl= 'https://192.168.91.78:9000/realms/demo/'; // Vinorsoft sso uat
       var logoutCallbackUrl= 'testsso://app/login';
       var url = realmUrl+'protocol/openid-connect/logout'+'?post_logout_redirect_uri='+encodeURIComponent(logoutCallbackUrl)
       +'&id_token_hint='+ id_token;
@@ -70,7 +78,7 @@ const LoginScreen = ({route}) => {
   // Mô phỏng Backend của ứng dụng, thực hiện gửi code đến SSO để lấy access token
   const sendCodeToSSO = async () => {
     //const realmUrl= 'http://172.21.180.110:8080/realms/master/'; // local sso
-    const realmUrl= 'https://172.22.213.240:9000/realms/demo/'; // Vinorsoft sso uat
+    const realmUrl= 'https://192.168.91.78:9000/realms/demo/'; // Vinorsoft sso uat
     const subpath = 'protocol/openid-connect/token';
     var details = {
       'code': acode,
@@ -123,24 +131,23 @@ const LoginScreen = ({route}) => {
 
 
   ///////////////// ĐĂNG NHẬP TRỰC TIẾP /////////////////////
-   // hàm đăng nhập trực tiếp vào SSO bằng username và password
+// hàm đăng nhập trực tiếp vào SSO bằng username và password
 // Lệnh curl để kiểm tra việc lấy token bằng direct accesss
-//  curl -L -X POST 'http://172.22.213.240:9001/realms/demo/protocol/openid-connect/token' 
+//  curl -L -X POST 'http://192.168.91.78:9001/realms/demo/protocol/openid-connect/token' 
 // -H 'Content-Type: application/x-www-form-urlencoded' --data-urlencode 'client_id=testApp1' 
 // --data-urlencode 'grant_type=password' --data-urlencode 'client_secret=mEO8KhVmS5fKng0MYJjF8lyWuFGD9xKJ' 
 // --data-urlencode 'scope=openid' --data-urlencode 'username=user1' --data-urlencode 'password=123456'
 const handleSSOdirect = async () => {
   //const realmUrl= 'http://172.21.180.110:8080/realms/master/'; // local sso
-  const realmUrl= 'http://172.22.213.240:9001/realms/demo/'; // local sso
+  const realmUrl= 'http://192.168.91.78:9001/realms/demo/'; // local sso
   const subpath = 'protocol/openid-connect/token';
   var details = {
-    'client_id': 'testApp1',
+    'client_id': 'SuperApp',
     'grant_type': 'password',
-    //'client_secret': 'mEO8KhVmS5fKng0MYJjF8lyWuFGD9xKJ', // local sso
-    //'client_secret': 'Jue7RnRsDZxVzpkuTk0c5iHws4SYq05o', // Vinorsoft sso uat
+    'client_secret': 'MKpdeW6MTxI3D9VVB4Uvixma7V59JZUc', 
     'scope':'openid',
-    'username':'user1',
-    'password': '123456'
+    'username':'user1', // Do FE gửi lên
+    'password': '123456' // Do FE gửi lên
   };
   var formBody = [];
   for (var property in details) {
@@ -160,22 +167,21 @@ const handleSSOdirect = async () => {
         body: formBody
       })
       .then(responseData => {
-        //console.log(responseData);
+        console.log(responseData);
         responseData.json()
             .then(_bodyBlob => {
                 //console.log(_bodyBlob.access_token);
                 //var decoded = jwt_decode(_bodyBlob.access_token);
                 //console.log(decoded);
               
-                // Lấy ID token để dành cho gọi ứng dụng khác
-                id_token = _bodyBlob.id_token;
+                // Lấy  token gửi cho FE
+                id_token = _bodyBlob.id_token; 
                 refresh_token = _bodyBlob.refresh_token;
                 access_token = _bodyBlob.access_token;
-                console.log(id_token);
+                //console.log(id_token);
                 var decoded = jwt_decode(_bodyBlob.id_token);
                 console.log(decoded);
-            });
-            
+            });   
       })
       .catch(function (error) {
         console.log(`Login API error: ${error}`);
@@ -191,12 +197,12 @@ const handleSSOdirect = async () => {
 // Muốn logout all phải lấy logout token sau đó gọi backchannel-logout, cái này yêu cầu https mới lấy được
 const logoutSSOdirect = async () => {
   //const realmUrl= 'http://172.21.180.110:8080/realms/master/'; // local sso
-  const realmUrl= 'http://172.22.213.240:9001/realms/demo/'; // local sso
+  const realmUrl= 'http://192.168.91.78:9001/realms/demo/'; // local sso
   const subpath = 'protocol/openid-connect/logout';
   //console.log("access_token = ",access_token);
   var details = {
-    'client_id': 'testApp1',
-    //'client_secret': 'mEO8KhVmS5fKng0MYJjF8lyWuFGD9xKJ', // local sso
+    'client_id': 'SuperApp',
+    'client_secret': 'MKpdeW6MTxI3D9VVB4Uvixma7V59JZUc', 
     'refresh_token': refresh_token
   };
   var formBody = [];
@@ -229,9 +235,9 @@ const logoutSSOdirect = async () => {
   }
 };
 
-const openApp2 = async() => {
+const openApp1 = async() => {
   try {
-    url = 'testsso2://app/login&id_token='+id_token;
+    url = 'testsso1://app/login&refresh_token='+refresh_token_1;
     console.log(url);
     await Linking.openURL(url);
   }
@@ -242,7 +248,117 @@ const openApp2 = async() => {
 
 };
 
-    
+// Superapp thực hiện đăng nhập các ứng dụng con
+// bằng bộ username password của superapp, nếu ok thì nó nhận được refresh token
+// refresh token này được gửi tới app con thông qua deeplink
+// Trên superapp, khi người dùng click vào một app con, FE sẽ gọi tới api này
+
+// Trường hợp bộ user password không giống, FE sẽ yêu cầu người dùng nhập user mk của app con kia
+// có kèm theo OTP
+
+// Như vậy super app cần lưu các bộ user mk tương ứng với app con
+// SSO sẽ lưu bộ AD con trong từng realm riêng, nếu như app con nào dùng AD nào thì app đó sẽ là client của realm đấy
+
+const loginSSO_App1 = async () => {
+  const realmUrl= 'http://192.168.91.78:9001/realms/demo/'; // local sso
+  const subpath = 'protocol/openid-connect/token';
+  var details = {
+    'client_id': 'testApp1',
+    'grant_type': 'password',
+    'client_secret': 'eoO5J1gf52EHcUnDdvnC3Jj6ihcb4Cm8', 
+    'scope':'openid',
+    'username':'user1', // Do FE gửi lên
+    'password': '123456' // Do FE gửi lên
+  };
+  var formBody = [];
+  for (var property in details) {
+    var encodedKey = encodeURIComponent(property);
+    var encodedValue = encodeURIComponent(details[property]);
+    formBody.push(encodedKey + "=" + encodedValue);
+  }
+  formBody = formBody.join("&");
+  try {
+     await fetch(
+      realmUrl+subpath, 
+      { // request option
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        }, 
+        body: formBody
+      })
+      .then(responseData1 => {
+        console.log(responseData1);
+        responseData1.json()
+            .then(_bodyBlob => {
+              console.log(_bodyBlob)
+                // Lấy  refresh_token gửi cho FE, FE gắn vào deeplink mở App1
+                id_token_1 = _bodyBlob.id_token;  // cái này để cho superapp dùng khi logout app 1
+                refresh_token_1 = _bodyBlob.refresh_token; // cái này gắn vào deeplink cho ông app 1 dùng
+                //access_token_1 = _bodyBlob.access_token;
+                var decoded2 = jwt_decode( _bodyBlob.id_token);
+                console.log("refresh_token_1: "+refresh_token_1);
+            });   
+      })
+      .catch(function (error) {
+        console.log(`Login API app 1 error: ${error}`);
+        return Promise.reject(error);
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+// Khi App 1 nhận được refresh token từ deeplink (superapp tạo ra)
+// App 1 thực hiện gọi lên SSO để lấy access token
+const handleSSO_App1 = async () => {
+  const realmUrl= 'http://192.168.91.78:9001/realms/demo/'; // local sso
+  const subpath = 'protocol/openid-connect/token';
+  var details = {
+    'client_id': 'testApp1',
+    'grant_type': 'refresh_token',
+    'client_secret': 'eoO5J1gf52EHcUnDdvnC3Jj6ihcb4Cm8', 
+    'scope':'openid',
+    'refresh_token':refresh_token_1, // Do Superapp truyền cho
+  };
+  var formBody = [];
+  for (var property in details) {
+    var encodedKey = encodeURIComponent(property);
+    var encodedValue = encodeURIComponent(details[property]);
+    formBody.push(encodedKey + "=" + encodedValue);
+  }
+  formBody = formBody.join("&");
+  try {
+     await fetch(
+      realmUrl+subpath, 
+      { // request option
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        }, 
+        body: formBody
+      })
+      .then(responseData3 => {
+        //console.log(responseData);
+        responseData3.json()
+            .then(_bodyBlob => {
+                console.log("App 1: "+_bodyBlob.refresh_token)
+                //id_token_1 = _bodyBlob.id_token; 
+                //refresh_token_1 = _bodyBlob.refresh_token;
+                access_token_1 = _bodyBlob.access_token;
+                var decoded = jwt_decode(_bodyBlob.access_token);
+                console.log("access_token_1: "+access_token_1);
+            });   
+      })
+      .catch(function (error) {
+        console.log(`Login API app 1 error: ${error}`);
+        return Promise.reject(error);
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 
 
   return (
@@ -253,7 +369,7 @@ const openApp2 = async() => {
               >
                   <Text style={styles.des}>Phần mềm demo SSO 1</Text>
                   <Button
-                    title="Login via SSO"
+                    title="Login SuperApp"
                     onPress={
                      //handleSSO
                      handleSSOdirect
@@ -276,10 +392,18 @@ const openApp2 = async() => {
                     }
                   />
 
+
                   <Button
-                    title="Open App2"
+                    title="Login App1"
                     onPress={
-                     openApp2
+                     loginSSO_App1
+                    }
+                  />
+                  <Button
+                    title="Open App1"
+                    onPress={
+                     //openApp1
+                     handleSSO_App1
                     }
                   />
               </View>
