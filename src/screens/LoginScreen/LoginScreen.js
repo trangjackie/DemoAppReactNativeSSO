@@ -139,15 +139,15 @@ const LoginScreen = ({route}) => {
 // --data-urlencode 'scope=openid' --data-urlencode 'username=user1' --data-urlencode 'password=123456'
 const handleSSOdirect = async () => {
   //const realmUrl= 'http://172.21.180.110:8080/realms/master/'; // local sso
-  const realmUrl= 'http://192.168.91.78:9001/realms/demo/'; // local sso
+  const realmUrl= 'http://117.4.247.68:10825/realms/demo/'; // local sso
   const subpath = 'protocol/openid-connect/token';
   var details = {
     'client_id': 'SuperApp',
     'grant_type': 'password',
-    'client_secret': 'MKpdeW6MTxI3D9VVB4Uvixma7V59JZUc', 
+    'client_secret': 'fqe0VdvvDRRynN61RTtnrAylu99KgQBq', 
     'scope':'openid',
     'username':'user1', // Do FE gửi lên
-    'password': '123456' // Do FE gửi lên
+    'password': '654321' // Do FE gửi lên
   };
   var formBody = [];
   for (var property in details) {
@@ -178,7 +178,7 @@ const handleSSOdirect = async () => {
                 id_token = _bodyBlob.id_token; 
                 refresh_token = _bodyBlob.refresh_token;
                 access_token = _bodyBlob.access_token;
-                //console.log(id_token);
+                console.log(access_token);
                 var decoded = jwt_decode(_bodyBlob.id_token);
                 console.log(decoded);
             });   
@@ -197,12 +197,12 @@ const handleSSOdirect = async () => {
 // Muốn logout all phải lấy logout token sau đó gọi backchannel-logout, cái này yêu cầu https mới lấy được
 const logoutSSOdirect = async () => {
   //const realmUrl= 'http://172.21.180.110:8080/realms/master/'; // local sso
-  const realmUrl= 'http://192.168.91.78:9001/realms/demo/'; // local sso
+  const realmUrl= 'http://117.4.247.68:10825/realms/demo/'; // local sso
   const subpath = 'protocol/openid-connect/logout';
   //console.log("access_token = ",access_token);
   var details = {
     'client_id': 'SuperApp',
-    'client_secret': 'MKpdeW6MTxI3D9VVB4Uvixma7V59JZUc', 
+    'client_secret': 'fqe0VdvvDRRynN61RTtnrAylu99KgQBq', 
     'refresh_token': refresh_token
   };
   var formBody = [];
@@ -237,7 +237,7 @@ const logoutSSOdirect = async () => {
 
 const openApp1 = async() => {
   try {
-    url = 'testsso1://app/login&refresh_token='+refresh_token_1;
+    url = 'mbamcsuperapp://authentication/login/?refresh_token='+refresh_token+'&access_token='+access_token;
     console.log(url);
     await Linking.openURL(url);
   }
@@ -260,15 +260,15 @@ const openApp1 = async() => {
 // SSO sẽ lưu bộ AD con trong từng realm riêng, nếu như app con nào dùng AD nào thì app đó sẽ là client của realm đấy
 
 const loginSSO_App1 = async () => {
-  const realmUrl= 'http://192.168.91.78:9001/realms/demo/'; // local sso
+  const realmUrl= 'http://117.4.247.68:10825/realms/demo/'; // local sso
   const subpath = 'protocol/openid-connect/token';
   var details = {
     'client_id': 'testApp1',
     'grant_type': 'password',
-    'client_secret': 'eoO5J1gf52EHcUnDdvnC3Jj6ihcb4Cm8', 
+    'client_secret': 'Jue7RnRsDZxVzpkuTk0c5iHws4SYq05o', 
     'scope':'openid',
     'username':'user1', // Do FE gửi lên
-    'password': '123456' // Do FE gửi lên
+    'password': '654321' // Do FE gửi lên
   };
   var formBody = [];
   for (var property in details) {
@@ -312,12 +312,12 @@ const loginSSO_App1 = async () => {
 // Khi App 1 nhận được refresh token từ deeplink (superapp tạo ra)
 // App 1 thực hiện gọi lên SSO để lấy access token
 const handleSSO_App1 = async () => {
-  const realmUrl= 'http://192.168.91.78:9001/realms/demo/'; // local sso
+  const realmUrl= 'http://117.4.247.68:10825/realms/demo/'; // local sso
   const subpath = 'protocol/openid-connect/token';
   var details = {
     'client_id': 'testApp1',
     'grant_type': 'refresh_token',
-    'client_secret': 'eoO5J1gf52EHcUnDdvnC3Jj6ihcb4Cm8', 
+    'client_secret': 'Jue7RnRsDZxVzpkuTk0c5iHws4SYq05o', 
     'scope':'openid',
     'refresh_token':refresh_token_1, // Do Superapp truyền cho
   };
@@ -402,8 +402,8 @@ const handleSSO_App1 = async () => {
                   <Button
                     title="Open App1"
                     onPress={
-                     //openApp1
-                     handleSSO_App1
+                     openApp1
+                     //handleSSO_App1
                     }
                   />
               </View>
